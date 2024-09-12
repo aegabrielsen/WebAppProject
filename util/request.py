@@ -3,7 +3,6 @@ class Request:
     def __init__(self, request: bytes):
         # TODO: parse the bytes of the request and populate the following instance variables
 
-        # test - delete
         self.body = b""
         self.method = ""
         self.path = ""
