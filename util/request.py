@@ -8,7 +8,7 @@ class Request:
         self.path = ""
         self.http_version = ""
         self.headers = {} # Note: The raw Cookies header should still be in your headers dictionary even after parsing the individual cookies in the cookies dictionary. -a
-        self.cookies = {} # Be sure to trim white space -a
+        self.cookies = {} 
         
         # print(request)
         # print(request.decode())
@@ -33,6 +33,13 @@ class Request:
             # new_header = {header[0]: header[1].strip()}
             self.headers[header[0]] = header[1].strip()
             # TODO: CHECK HERE IF HEADER IS A COOKIE
+            if (header[0] == 'Cookie'):
+                cookies = header[1].split(';')
+                for c in cookies:
+                    c = c.strip()
+                    cookie_kv = c.split('=')
+                    self.cookies[cookie_kv[0]] = cookie_kv[1].strip()
+                    
 
 
 
@@ -60,10 +67,37 @@ def test2():
     assert request.http_version == "HTTP/1.1"
     assert "Host" in request.headers 
     assert request.headers["Host"] == "localhost:8080"
-    assert "Host" in request.headers 
+    assert "Connection" in request.headers 
     assert request.headers["Connection"] == "keep-alive"
     assert request.body == b"hello" 
+
+def test3():
+    request = Request(b'GET / HTTP/1.1\r\nHost: localhost:8080\r\nConnection: keep-alive\r\nCookie: id=X6kAwpgW29M; visits=4\r\n\r\nhello')
+    
+    assert request.method == "GET"
+    assert request.path == "/"
+    assert request.http_version == "HTTP/1.1"
+    assert "Host" in request.headers 
+    assert request.headers["Host"] == "localhost:8080"
+    assert "Connection" in request.headers 
+    assert request.headers["Connection"] == "keep-alive"
+    assert "id" in request.cookies
+    assert request.cookies["id"] == "X6kAwpgW29M"
+    assert "visits" in request.cookies 
+    assert request.cookies["visits"] == "4"
+    assert request.body == b"hello" 
+
+def testprint():
+    request = Request(b'GET / HTTP/1.1\r\nHost: localhost:8080\r\nConnection: keep-alive\r\nCookie: id=X6kAwpgW29M; visits=4\r\n\r\nhello')
+    print(request.method)
+    print(request.path)
+    print(request.http_version)
+    print(request.headers)
+    print(request.cookies)
+    print(request.body)
 
 if __name__ == '__main__':
     test1()
     test2()
+    test3()
+    testprint()
