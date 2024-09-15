@@ -10,27 +10,17 @@ class Request:
         self.headers = {} # Note: The raw Cookies header should still be in your headers dictionary even after parsing the individual cookies in the cookies dictionary. -a
         self.cookies = {} 
         
-        # print(request)
-        # print(request.decode())
-        lines = request.split(b'\r\n')
-        # print(lines)
+
+        body_line = request.split(b'\r\n\r\n')
+        self.body = body_line[1]
+        lines = body_line[0].split(b'\r\n')
         status_line = lines.pop(0).split(b' ') # No error checking. Consider checking if length != 3
         self.method = status_line[0].decode()
         self.path = status_line[1].decode()
         self.http_version = status_line[2].decode()
 
-        # print(lines)
-        body_line = False
         for l in lines:
-            if body_line: # Should be last line
-                self.body = l
-                break
-            if l == b'': # First \r\n that signifies the next line is the body
-                body_line = True
-                continue
-            # At this point l should be a header
             header = l.decode().split(':', 1)
-            # new_header = {header[0]: header[1].strip()}
             self.headers[header[0]] = header[1].strip()
             # TODO: CHECK HERE IF HEADER IS A COOKIE
             if (header[0] == 'Cookie'):
@@ -40,10 +30,6 @@ class Request:
                     cookie_kv = c.split('=')
                     self.cookies[cookie_kv[0]] = cookie_kv[1].strip()
                     
-
-
-
-
 
 def test1():
     request = Request(b'GET / HTTP/1.1\r\nHost: localhost:8080\r\nConnection: keep-alive\r\n\r\n')
