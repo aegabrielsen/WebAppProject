@@ -8,7 +8,7 @@ class Request:
         self.headers = {} # Note: The raw Cookies header should still be in your headers dictionary even after parsing the individual cookies in the cookies dictionary. -a
         self.cookies = {} 
 
-        body_line = request.split(b'\r\n\r\n')
+        body_line = request.split(b'\r\n\r\n', 1)
         self.body = body_line[1]
         lines = body_line[0].split(b'\r\n')
         status_line = lines.pop(0).split(b' ') # No error checking. Consider checking if length != 3

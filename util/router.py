@@ -1,4 +1,4 @@
-from util.paths import error_404
+from util.paths.error_404 import error_404
 class Router:
 
     def __init__(self):

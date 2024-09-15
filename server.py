@@ -1,8 +1,8 @@
 import socketserver
 from util.request import Request
 from util.router import Router
-from util.hello_path import hello_path
-from util.paths import *
+from util.paths.hello_path import hello_path
+from util.paths.home_page import home_page
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
