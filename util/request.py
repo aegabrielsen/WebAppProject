@@ -1,15 +1,12 @@
 class Request:
 
-    def __init__(self, request: bytes):
-        # TODO: parse the bytes of the request and populate the following instance variables
-        
+    def __init__(self, request: bytes):        
         self.body = b""
         self.method = ""
         self.path = ""
         self.http_version = ""
         self.headers = {} # Note: The raw Cookies header should still be in your headers dictionary even after parsing the individual cookies in the cookies dictionary. -a
         self.cookies = {} 
-        
 
         body_line = request.split(b'\r\n\r\n')
         self.body = body_line[1]
