@@ -12,9 +12,11 @@ class Router:
              if r.exact_path:
                 if r.path == request.path and r.method == request.method:
                     r.action(request, handler)
+                    return
              else:
-                if r.path.startswith(request.path) and r.method == request.method:
+                if request.path.startswith(r.path) and r.method == request.method:
                     r.action(request, handler)
+                    return
         error_404(request, handler)
                 
 
