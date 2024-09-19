@@ -8,6 +8,7 @@ from util.paths.public.functions_path import functions_path
 from util.paths.public.image_paths import *
 from util.paths.public.style_path import style_path
 from util.paths.public.webrtc_path import webrtc_path
+from util.paths.chat_messages import *
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
@@ -27,6 +28,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.router.add_route("GET", "/public/image/elephant.jpg", elephant_path, True)
         self.router.add_route("GET", "/public/image/flamingo.jpg", flamingo_path, True)
         self.router.add_route("GET", "/public/image/kitten.jpg", kitten_path, True)
+        self.router.add_route("GET", "/chat-messages", chat_get, True)
+        self.router.add_route("POST", "/chat-messages", chat_post, True)
         # TODO: Add your routes here
         super().__init__(request, client_address, server)
 
