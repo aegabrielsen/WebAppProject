@@ -10,8 +10,8 @@ def chat_post(request, handler):
     text = "Message sent"
     print(request.body)
     message_obj = json.loads(request.body)
-    # "id": str(uuid.uuid4()), 
-    chat_collection.insert_one({"username": "Guest", "message": html.escape(message_obj["message"])})
+    user_browser_id = request.cookies.get("user")
+    chat_collection.insert_one({"username": "Guest", "message": html.escape(message_obj["message"]), "user_browser_id": user_browser_id})
     response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(text.encode())}\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n{text}"
     handler.request.sendall(response.encode())
 
@@ -20,7 +20,7 @@ def chat_get(request, handler):
     # print(chats)
     for i in chats:
         i['id'] = str(i.pop("_id"))
-    print(chats)
+    # print(chats)
     
     chat_history = json.dumps(chats)
     response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(chat_history)}\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n{chat_history}"

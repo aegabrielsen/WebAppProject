@@ -108,12 +108,40 @@ function addMessageToChat(messageJSON) {
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
+function getUserCookie() {
+    let cookies = document.cookie;
+    let userBrowserId = "";
+    console.log(cookies);
+    if (cookies) {
+        let cookiesList = cookies.split(';');
+        console.log(cookiesList);
+        for (let i = 0; i < cookiesList.length; i++) { 
+            if (cookiesList[i].includes('user=')){
+                userBrowserId = cookiesList[i];
+                console.log(userBrowserId);
+                userBrowserId = userBrowserId.trim();
+                console.log(userBrowserId);
+                userBrowserId = userBrowserId.slice(5);
+                console.log(userBrowserId);
+                break;
+            }
+        }
+    }
+    return userBrowserId;
+}
+
 function chatMessageHTML(messageJSON) {
     const username = messageJSON.username;
     const message = messageJSON.message;
     const messageId = messageJSON.id;
+    const userMessageId = messageJSON.user_browser_id;
+    const userBrowserId = getUserCookie();
     let messageHTML = "<div id='message_" + messageId + "'><button onclick='deleteMessage(\"" + messageId + "\")'>X</button> ";
-    messageHTML += "<b>" + username + "</b>: " + message + "</div>";
+    if (userBrowserId == userMessageId) {
+        messageHTML += "<b style='color:red'>" + username + "</b>: " + message + "</div>";
+    } else {
+        messageHTML += "<b>" + username + "</b>: " + message + "</div>";
+    }
     return messageHTML;
 }
 
