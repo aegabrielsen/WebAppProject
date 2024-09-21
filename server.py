@@ -34,6 +34,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.router.add_route("GET", "/public/image/kitten.jpg", kitten_path, True)
         self.router.add_route("GET", "/chat-messages", chat_get, True)
         self.router.add_route("POST", "/chat-messages", chat_post, True)
+        self.router.add_route("DELETE", "/chat-messages", chat_delete, False)
         # TODO: Add your routes here
         super().__init__(request, client_address, server)
 
