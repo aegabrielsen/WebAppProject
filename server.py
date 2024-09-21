@@ -9,7 +9,11 @@ from util.paths.public.image_paths import *
 from util.paths.public.style_path import style_path
 from util.paths.public.webrtc_path import webrtc_path
 from util.paths.chat_messages import *
-
+from pymongo import MongoClient
+mongo_client = MongoClient("mongo")
+db = mongo_client["cse312"]
+chat_collection = db["chat"]
+# chat_collection.insert_one({"username": "hartloff", "message": "hello"})
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def __init__(self, request, client_address, server):
@@ -39,6 +43,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         print("--- received data ---")
         print(received_data)
         print("--- end of data ---\n\n")
+        # print(chat_collection.find({"username": "hartloff"})[0])
         request = Request(received_data)
 
         self.router.route_request(request, self)
@@ -48,7 +53,7 @@ def main():
     host = "0.0.0.0"
     port = 8080
     socketserver.TCPServer.allow_reuse_address = True
-
+    
     server = socketserver.TCPServer((host, port), MyTCPHandler)
 
     print("Listening on port " + str(port))
