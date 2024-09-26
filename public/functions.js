@@ -111,18 +111,18 @@ function addMessageToChat(messageJSON) {
 function getUserCookie() {
     let cookies = document.cookie;
     let userBrowserId = "";
-    console.log(cookies);
+    // console.log(cookies);
     if (cookies) {
         let cookiesList = cookies.split(';');
-        console.log(cookiesList);
+        // console.log(cookiesList);
         for (let i = 0; i < cookiesList.length; i++) { 
             if (cookiesList[i].includes('user=')){
                 userBrowserId = cookiesList[i];
-                console.log(userBrowserId);
+                // console.log(userBrowserId);
                 userBrowserId = userBrowserId.trim();
-                console.log(userBrowserId);
+                // console.log(userBrowserId);
                 userBrowserId = userBrowserId.slice(5);
-                console.log(userBrowserId);
+                // console.log(userBrowserId);
                 break;
             }
         }

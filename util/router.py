@@ -8,6 +8,8 @@ class Router:
         self.route_list.append(Route(method, path, action, exact_path))
 
     def route_request(self, request, handler):
+        if ".." in request.path:
+            error_404(request, handler)
         for r in self.route_list:
              if r.exact_path:
                 if r.path == request.path and r.method == request.method:

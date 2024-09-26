@@ -31,5 +31,5 @@ def chat_delete(request, handler):
     print(request.path)
     print(request.body)
     chat_collection.delete_one({'_id': ObjectId(request.path.replace('/chat-messages/', ''))})
-    response = f"HTTP/1.1 204 No Content\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n"
+    response = f"HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n"
     handler.request.sendall(response.encode())
