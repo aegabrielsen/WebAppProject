@@ -9,6 +9,7 @@ from util.paths.public.image_paths import *
 from util.paths.public.style_path import style_path
 from util.paths.public.webrtc_path import webrtc_path
 from util.paths.chat_messages import *
+from util.auth import *
 from pymongo import MongoClient
 mongo_client = MongoClient("mongo")
 db = mongo_client["cse312"]
@@ -46,6 +47,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         print("--- end of data ---\n\n")
         # print(chat_collection.find({"username": "hartloff"})[0])
         request = Request(received_data)
+
+        # print(extract_credentials(request))
 
         self.router.route_request(request, self)
 

@@ -9,17 +9,18 @@ class Request:
         self.cookies = {} 
 
         body_line = request.split(b'\r\n\r\n', 1)
-        self.body = body_line[1]
+        if len(body_line) > 1:
+            self.body = body_line[1]
         lines = body_line[0].split(b'\r\n')
         status_line = lines.pop(0).split(b' ') # No error checking. Consider checking if length != 3
         self.method = status_line[0].decode()
-        self.path = status_line[1].decode()
-        self.http_version = status_line[2].decode()
+        if len(status_line) > 1:
+            self.path = status_line[1].decode()
+            self.http_version = status_line[2].decode()
 
         for l in lines:
             header = l.decode().split(':', 1)
             self.headers[header[0]] = header[1].strip()
-            # TODO: CHECK HERE IF HEADER IS A COOKIE
             if (header[0] == 'Cookie'):
                 cookies = header[1].split(';')
                 for c in cookies:
