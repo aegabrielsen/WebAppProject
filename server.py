@@ -9,6 +9,8 @@ from util.paths.public.image_paths import *
 from util.paths.public.style_path import style_path
 from util.paths.public.webrtc_path import webrtc_path
 from util.paths.chat_messages import *
+from util.paths.login_logout_register_path import *
+from util.paths.spotify import *
 from util.auth import *
 from pymongo import MongoClient
 mongo_client = MongoClient("mongo")
@@ -36,6 +38,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.router.add_route("GET", "/chat-messages", chat_get, True)
         self.router.add_route("POST", "/chat-messages", chat_post, True)
         self.router.add_route("DELETE", "/chat-messages", chat_delete, False)
+
+        self.router.add_route("POST", "/login", login, True)
+        self.router.add_route("POST", "/register", register, True)
+        self.router.add_route("POST", "/logout", logout, True)
+        self.router.add_route("GET", "/spotify-login?", spotify_login, True)
+        self.router.add_route("GET", "/spotify", spotify, False)
         # TODO: Add your routes here
         super().__init__(request, client_address, server)
 

@@ -2,8 +2,8 @@ def extract_credentials(request):
     line = request.body.decode().split('&')
     username = line[0].split('=', 1)[1]
     password = line[1].split('=', 1)[1]
-    percents = ['%21', '%40', '%23', '%24', '%25', '%5E', '%26', '%28', '%29', '%2D', '%5F', '%3D']
-    numbers = ['!', '@', '#', '$', '%', '^', '&', '(', ')', '-', '_', '=']
+    percents = ['%21', '%40', '%23', '%24', '%5E', '%26', '%28', '%29', '%2D', '%5F', '%3D', '%25']
+    numbers = ['!', '@', '#', '$', '^', '&', '(', ')', '-', '_', '=', '%']
     for i, p in enumerate(percents):
         password = password.replace(p, numbers[i])
     return [username, password] # Username and password both as strings
