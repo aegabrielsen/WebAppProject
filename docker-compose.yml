@@ -6,8 +6,8 @@ services:
     build: .
     environment:
       WAIT_HOSTS: mongo:27017
-      CLIENT_ID: 3e4c05a20b1047ae9b0d0e5262576cb8
-      CLIENT_SECRET: ca25701f0e96407688f3c4384a908bfb
+      CLIENT_ID: INSERT ID
+      CLIENT_SECRET: INSERT SECRET
       REDIRECT_URI: http://localhost:8080/spotify
     ports:
       - '8080:8080'
