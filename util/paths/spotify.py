@@ -4,12 +4,14 @@ import json
 import hashlib
 import requests
 import base64
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+# from pymongo import MongoClient
+# from bson.objectid import ObjectId
 from util.cookie_auth import *
-mongo_client = MongoClient("mongo")
-db = mongo_client["cse312"]
-user_collection = db["users"]
+# mongo_client = MongoClient("mongo")
+# db = mongo_client["cse312"]
+# user_collection = db["users"]
+from util.mongo import user_collection
+# from server import user_collection
 client_id = os.environ.get('CLIENT_ID', 'No variable')
 client_secret = os.environ.get('CLIENT_SECRET', 'No variable')
 redirect_uri = os.environ.get('REDIRECT_URI', 'No variable')

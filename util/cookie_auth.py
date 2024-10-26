@@ -1,8 +1,11 @@
 import hashlib
-from pymongo import MongoClient
-mongo_client = MongoClient("mongo")
-db = mongo_client["cse312"]
-user_collection = db["users"]
+# from pymongo import MongoClient
+# mongo_client = MongoClient("mongo")
+# db = mongo_client["cse312"]
+# user_collection = db["users"]
+# from server import user_collection
+from util.mongo import user_collection
+from util.mongo import chat_collection
 
 def cookie_auth(request):
     auth_token = request.cookies.get("auth_token")

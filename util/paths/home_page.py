@@ -1,10 +1,13 @@
 import uuid
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+# from pymongo import MongoClient
+# from bson.objectid import ObjectId
 from util.cookie_auth import *
-mongo_client = MongoClient("mongo")
-db = mongo_client["cse312"]
-user_collection = db["users"]
+# mongo_client = MongoClient("mongo")
+# db = mongo_client["cse312"]
+# user_collection = db["users"]
+# from server import user_collection
+from util.mongo import user_collection
+
 # send home_page to /
 def home_page(request, handler):
     f = open("public/index.html", "rb")

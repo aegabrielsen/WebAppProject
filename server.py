@@ -12,10 +12,13 @@ from util.paths.chat_messages import *
 from util.paths.login_logout_register_path import *
 from util.paths.spotify import *
 from util.auth import *
-from pymongo import MongoClient
-mongo_client = MongoClient("mongo")
-db = mongo_client["cse312"]
-chat_collection = db["chat"]
+from util.mongo import user_collection
+from util.mongo import chat_collection
+# from pymongo import MongoClient
+# mongo_client = MongoClient("mongo")
+# db = mongo_client["cse312"]
+# chat_collection = db["chat"]
+# user_collection = db["users"]
 # chat_collection.insert_one({"username": "hartloff", "message": "hello"})
 class MyTCPHandler(socketserver.BaseRequestHandler):
 

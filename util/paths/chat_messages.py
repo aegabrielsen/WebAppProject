@@ -1,12 +1,14 @@
 import json
 import html
-from pymongo import MongoClient
+# from pymongo import MongoClient
 from bson.objectid import ObjectId
 from util.cookie_auth import *
-mongo_client = MongoClient("mongo")
-db = mongo_client["cse312"]
-chat_collection = db["chat"]
-user_collection = db["users"]
+# mongo_client = MongoClient("mongo")
+# db = mongo_client["cse312"]
+# chat_collection = db["chat"]
+# user_collection = db["users"]
+# from server import chat_collection
+from util.mongo import chat_collection
 
 def chat_post(request, handler):
     text = "Message sent"
