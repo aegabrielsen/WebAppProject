@@ -9,6 +9,7 @@ from util.paths.public.image_paths import *
 from util.paths.public.style_path import style_path
 from util.paths.public.webrtc_path import webrtc_path
 from util.paths.chat_messages import *
+from util.paths.media_uploads import *
 from util.paths.login_logout_register_path import *
 from util.paths.spotify import *
 from util.auth import *
@@ -38,9 +39,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.router.add_route("GET", "/public/image/elephant.jpg", elephant_path, True)
         self.router.add_route("GET", "/public/image/flamingo.jpg", flamingo_path, True)
         self.router.add_route("GET", "/public/image/kitten.jpg", kitten_path, True)
+        self.router.add_route("GET", "/public/image", uploaded_image, False)
         self.router.add_route("GET", "/chat-messages", chat_get, True)
         self.router.add_route("POST", "/chat-messages", chat_post, True)
         self.router.add_route("DELETE", "/chat-messages", chat_delete, False)
+        self.router.add_route("POST", "/media-uploads", media_uploads, True)
 
         self.router.add_route("POST", "/login", login, True)
         self.router.add_route("POST", "/register", register, True)
@@ -59,7 +62,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         # print(chat_collection.find({"username": "hartloff"})[0])
         request = Request(received_data)
 
-        # print(extract_credentials(request))
+        content_length = int(request.headers.get('Content-Length', 0))
+        received_body_length = len(request.body)
+        while received_body_length < content_length:
+            received_data += self.request.recv(2048)
+            received_body_length += 2048
+        request = Request(received_data)
 
         self.router.route_request(request, self)
 
