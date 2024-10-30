@@ -68,7 +68,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             received_data += self.request.recv(2048)
             received_body_length += 2048
         request = Request(received_data)
-
         self.router.route_request(request, self)
 
 

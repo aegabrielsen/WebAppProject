@@ -51,9 +51,15 @@ def uploaded_image(request, handler):
     image_path = request.path
     image_path = image_path.split("/image/", 1)[1]
     image_path = image_path.replace("/", "")
-    print(image_path)
+    # print(image_path)
     f = open(f"public/image/{image_path}", "rb")
     file_contents = f.read()
-    response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(file_contents)}\r\nContent-Type: image/jpeg; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n"
+    extension = image_path.split(".")[1]
+    if extension == "mp4":
+        response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(file_contents)}\r\nContent-Type: video/mp4; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n"
+    elif extension == "jpg":
+        response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(file_contents)}\r\nContent-Type: image/jpeg; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n"
+    else:
+        response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(file_contents)}\r\nContent-Type: image/{extension}; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\n\r\n"
     response = response.encode() + file_contents
     handler.request.sendall(response)
