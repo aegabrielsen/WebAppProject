@@ -65,8 +65,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         content_length = int(request.headers.get('Content-Length', 0))
         received_body_length = len(request.body)
         while received_body_length < content_length:
-            received_data += self.request.recv(2048)
-            received_body_length += 2048
+            received_data_temp = self.request.recv(2048)
+            # received_data += self.request.recv(2048)
+            received_data += received_data_temp
+            # received_body_length += 2048
+            received_body_length += len(received_data_temp)
+        # received_data += self.request.recv(2048)
         request = Request(received_data)
         self.router.route_request(request, self)
 

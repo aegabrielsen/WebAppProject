@@ -1,11 +1,12 @@
 # import html
 import uuid
 import ffmpeg
-from PIL import Image
+from PIL import Image, ImageFile, ImageSequence
 # from bson.objectid import ObjectId
 from util.cookie_auth import *
 from util.mongo import chat_collection
 from util.multipart import parse_multipart
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def media_uploads(request, handler):
     print(request.body)
@@ -55,6 +56,14 @@ def media_uploads(request, handler):
         except ffmpeg.Error as e:
             print(f"Error: {e.stderr.decode('utf-8')}")
         # print('hello world')
+    elif extension == 'gif':
+        image = Image.open(filename)
+        pics = []
+        for pic in ImageSequence.Iterator(image):
+            pic = pic.copy()
+            pic.thumbnail((240, 240))
+            pics.append(pic)
+        pics[0].save(filename, save_all=True, append_images=pics[1:], optimize=False, duration=image.info['duration'], loop=0)
     else:
         image = Image.open(filename)
         image.thumbnail((240, 240))
@@ -65,16 +74,15 @@ def media_uploads(request, handler):
     #\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x13\x00\x00\x00\x11\x08\x06\x00\x00\x00?\x98\x97\xc7\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x
     #\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x06^\x00\x00\x02\xbf\x08\x02\x00\x00\x00\x87\x82\'t\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x04gAMA\x00\x00\xb1\x8f\x0b\xfca\x05\x00\x00\x00\tpHYs\x00\x00\x12t\x00\x00\x12t\x01\xdef\x1fx\x00\x00N\xc9IDATx^\xed\xddYB\xe3\xc8\xb6\x05\xd0;.
     if user:
-
         if extension == 'mp4':
-            chat_collection.insert_one({"username": "Guest", "message": f'<video controls><source src="public/image/vid{image_id}.{extension}" type="video/mp4"></video>', "user_browser_id": user_browser_id})
+            chat_collection.insert_one({"username": user.get('username'), "message": f'<video controls><source src="public/image/vid{image_id}.{extension}" type="video/mp4"></video>', "user_browser_id": user_browser_id})
         else:
-            chat_collection.insert_one({"username": user.get('username'), "message": f'<img src="public/image/vid{image_id}.{extension}">', "user_browser_id": user_browser_id})
+            chat_collection.insert_one({"username": user.get('username'), "message": f'<img src="public/image/image{image_id}.{extension}">', "user_browser_id": user_browser_id})
         #  width="240" height="240"
     else:
         if extension == 'mp4':
             chat_collection.insert_one({"username": "Guest", "message": f'<video controls><source src="public/image/vid{image_id}.{extension}" type="video/mp4"></video>', "user_browser_id": user_browser_id})
-        else:    
-            chat_collection.insert_one({"username": "Guest", "message": f'<img src="public/image/vid{image_id}.{extension}">', "user_browser_id": user_browser_id})
+        else:
+            chat_collection.insert_one({"username": "Guest", "message": f'<img src="public/image/image{image_id}.{extension}">', "user_browser_id": user_browser_id})
     response = f"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nContent-Type: text/html; charset=utf-8\r\nLocation: /\r\nX-Content-Type-Options: nosniff\r\n\r\n"
     handler.request.sendall(response.encode()) 
