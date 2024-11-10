@@ -13,8 +13,9 @@ from util.paths.media_uploads import *
 from util.paths.login_logout_register_path import *
 from util.paths.spotify import *
 from util.auth import *
-from util.mongo import user_collection
-from util.mongo import chat_collection
+from util.websockets import websocket_path
+# from util.mongo import user_collection
+# from util.mongo import chat_collection
 # from pymongo import MongoClient
 # mongo_client = MongoClient("mongo")
 # db = mongo_client["cse312"]
@@ -44,6 +45,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.router.add_route("POST", "/chat-messages", chat_post, True)
         self.router.add_route("DELETE", "/chat-messages", chat_delete, False)
         self.router.add_route("POST", "/media-uploads", media_uploads, True)
+        self.router.add_route("GET", "/websocket", websocket_path, True)
 
         self.router.add_route("POST", "/login", login, True)
         self.router.add_route("POST", "/register", register, True)
@@ -54,25 +56,26 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         super().__init__(request, client_address, server)
 
     def handle(self):
-        received_data = self.request.recv(2048)
-        print(self.client_address)
-        print("--- received data ---")
-        print(received_data)
-        print("--- end of data ---\n\n")
-        # print(chat_collection.find({"username": "hartloff"})[0])
-        request = Request(received_data)
+        while True:
+            received_data = self.request.recv(2048)
+            print(self.client_address)
+            print("--- received data ---")
+            print(received_data)
+            print("--- end of data ---\n\n")
+            # print(chat_collection.find({"username": "hartloff"})[0])
+            request = Request(received_data)
+            # if 'Content-Length' in request.headers:
+            content_length = int(request.headers.get('Content-Length', 0))
+            received_body_length = len(request.body)
+            while received_body_length < content_length:
+                received_data_temp = self.request.recv(2048)
+                received_data += received_data_temp
+                received_body_length += len(received_data_temp)
+            request = Request(received_data)
+            self.router.route_request(request, self)
 
-        content_length = int(request.headers.get('Content-Length', 0))
-        received_body_length = len(request.body)
-        while received_body_length < content_length:
-            received_data_temp = self.request.recv(2048)
-            # received_data += self.request.recv(2048)
-            received_data += received_data_temp
-            # received_body_length += 2048
-            received_body_length += len(received_data_temp)
-        # received_data += self.request.recv(2048)
-        request = Request(received_data)
-        self.router.route_request(request, self)
+
+
 
 
 def main():
@@ -80,7 +83,7 @@ def main():
     port = 8080
     socketserver.TCPServer.allow_reuse_address = True
     
-    server = socketserver.TCPServer((host, port), MyTCPHandler)
+    server = socketserver.ThreadingTCPServer((host, port), MyTCPHandler)
 
     print("Listening on port " + str(port))
     server.serve_forever()
