@@ -75,6 +75,7 @@ class Frame:
         for x in range(1, 8):
             temp += byte_chunks[1][x]
         self.payload_length = int(temp, 2)
+        cursor = 2
         if(self.payload_length == 126):
             temp_bytes = byte_chunks[2] + byte_chunks[3]
             temp = ''
@@ -82,6 +83,7 @@ class Frame:
                 temp += temp_bytes[x]
             # print(temp)
             self.payload_length = int(temp, 2)
+            cursor = 4
         elif(self.payload_length == 127):
             temp_bytes = ''
             for x in range(2, 10):
@@ -91,34 +93,32 @@ class Frame:
                 temp += temp_bytes[x]
             # print(temp)
             self.payload_length = int(temp, 2)
-        # if(mask_bit == 1):
-
-
-        
-        # binary = get_binary(bytes)
-        # self.fin_bit = int(binary[0])
-        # self.opcode = int(binary[4] + binary[5] + binary[6] + binary[7])
-        # mask_bit = int(binary[8])
-        # temp = ''
-        # for x in range(9, 16):
-        #     temp += binary[x]
-        # self.payload_length = int(temp, 2)
-        # cursor = 16
-        # if(self.payload_length == 126):
-        #     temp = ''
-        #     for x in range(16, 32):
-        #         temp += binary[x]
-        #     # print(temp)
-        #     self.payload_length = int(temp, 2)
-        #     cursor = 32
-        # elif(self.payload_length == 127):
-        #     temp = ''
-        #     for x in range(16, 80):
-        #         temp += binary[x]
-        #     # print(temp)
-        #     self.payload_length = int(temp, 2)
-        #     cursor = 80
-        # if(mask_bit == 1):
+            cursor = 10
+        if(mask_bit == 1):
+            masking_keys = []
+            masking_keys.append(int(byte_chunks[cursor], 2))
+            cursor += 1
+            masking_keys.append(int(byte_chunks[cursor], 2))
+            cursor += 1
+            masking_keys.append(int(byte_chunks[cursor], 2))
+            cursor += 1
+            masking_keys.append(int(byte_chunks[cursor], 2))
+            cursor += 1
+            print(masking_keys)
+        mask_idx = 0
+        # print(len(byte_chunks))
+        print(self.payload_length)
+        for x in range(cursor, len(byte_chunks)):
+            cur = byte_chunks[x]
+            if(mask_bit == 1):
+                # print(cur)
+                # print(bin(masking_keys[mask_idx % 4]).replace("0b", ""))
+                cur = int(cur, 2)
+                cur = str(bin(cur ^ masking_keys[mask_idx % 4]).replace("0b", ""))
+                # print(cur)
+                # print('===')
+                mask_idx + 1
+            self.payload += cur.encode()
 
         
 
@@ -155,6 +155,10 @@ def test2():
     # //frame.extractpayload()
     # assert len
     # assert decode
+    
+    print(len(frame.payload))
+    print(frame.payload)
+    print(byte_chunk_print(binary_to_byte_chunks(str(frame.payload))))
     print("===== TEST2 PASSED =====")
 
 def test_len_126():
