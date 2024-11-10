@@ -13,7 +13,8 @@ from util.paths.media_uploads import *
 from util.paths.login_logout_register_path import *
 from util.paths.spotify import *
 from util.auth import *
-from util.websockets import websocket_path
+# from util.websockets import websocket_path
+from util.websockets import *
 # from util.mongo import user_collection
 # from util.mongo import chat_collection
 # from pymongo import MongoClient
@@ -63,6 +64,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             print(received_data)
             print("--- end of data ---\n\n")
             # print(chat_collection.find({"username": "hartloff"})[0])
+            # if not received_data.startswith(b'81'):
             request = Request(received_data)
             # if 'Content-Length' in request.headers:
             content_length = int(request.headers.get('Content-Length', 0))
