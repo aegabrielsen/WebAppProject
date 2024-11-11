@@ -57,25 +57,25 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         super().__init__(request, client_address, server)
 
     def handle(self):
-        while True:
-            received_data = self.request.recv(2048)
-            print(self.client_address)
-            print("--- received data ---")
-            print(received_data)
-            print("--- end of data ---\n\n")
-            # print(chat_collection.find({"username": "hartloff"})[0])
-            # if not received_data.startswith(b'81'):
-            request = Request(received_data)
-            # if 'Content-Length' in request.headers:
-            content_length = int(request.headers.get('Content-Length', 0))
-            received_body_length = len(request.body)
-            while received_body_length < content_length:
-                received_data_temp = self.request.recv(2048)
-                received_data += received_data_temp
-                received_body_length += len(received_data_temp)
-            request = Request(received_data)
-            self.router.route_request(request, self)
+        # while True:
+        received_data = self.request.recv(2048)
+        print(self.client_address)
+        print("--- received data ---")
+        print(received_data)
+        print("--- end of data ---\n\n")
 
+        request = Request(received_data)
+
+        content_length = int(request.headers.get('Content-Length', 0))
+        received_body_length = len(request.body)
+        while received_body_length < content_length:
+            received_data_temp = self.request.recv(2048)
+            received_data += received_data_temp
+            received_body_length += len(received_data_temp)
+        request = Request(received_data)
+        self.router.route_request(request, self)
+        # while True:
+            # print(self.request.recv(2048))
 
 
 

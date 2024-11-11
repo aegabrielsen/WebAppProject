@@ -1,48 +1,8 @@
 import hashlib
 from base64 import b64encode
+from util.read_frames import while_reading_frames
+from util.byte_formating import *
 # from server import MyTCPHandler
-
-def byte_to_binary_string(the_byte):
-    as_binary = str(bin(the_byte))[2:]
-    for _ in range(len(as_binary), 8):
-        as_binary = '0' + as_binary
-    return as_binary
-
-def get_binary(bytes):
-    return byte_to_binary_string((int.from_bytes(bytes, byteorder='big')))
-
-def format_bytes(as_binary): # unused
-    string = ''
-    for i, b in enumerate(as_binary):
-        string += b
-        if (i + 1) % 8 == 0:
-            string += ' '
-        if (i + 1) % 32 == 0:
-            string += '\n'
-    return string
-
-def binary_to_byte_chunks(binary):
-    list = []
-    temp = ''
-    for i, b in enumerate(binary):
-        temp += b
-        if (i + 1) % 8 == 0:
-            list.append(temp)
-            temp = ''
-    if len(temp) > 0:
-        list.append(temp)
-    return list
-
-def byte_chunk_print(list):
-    str = ''
-    for i, s in enumerate(list):
-        str += s
-        str += ' '
-        if (i + 1) % 4 == 0:
-            str += '\n'
-    return str
-        
-# ===== BYTE PRINTING STUFF ABOVE THIS LINE =====
 
 def compute_accept(str):
     str += '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
@@ -55,11 +15,17 @@ def websocket_path(request, handler):
     print(request.body)
     accept = compute_accept(request.headers.get('Sec-WebSocket-Key', 0))
     response = f"HTTP/1.1 101 Switching Protocols\r\nContent-Length: 0\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Accept: {accept}\r\nX-Content-Type-Options: nosniff\r\n\r\n"
-    handler.request.sendall(response.encode()) 
+    handler.request.sendall(response.encode())
+    while_reading_frames(handler)
+    # while true (terminate yourself if there is an opcode 8)
+    # recieve frame (The TA said that he had a full file with functions with recv called like 5~ times. get the first bytes and decide how much more to read)
+    # read frame(he did these two in a full file)
+    # process frame ( so like have a chat function that reads the packet and then like puts the message in the database)
+    # respond with frame (so create the frame with the lo1 function and then handler.request.sendall(frame)
+    
 
 def parse_ws_frame(bstr: bytes):
     return Frame(bstr)
-
 
 class Frame:
     def __init__(self, bytes: bytes):
@@ -67,106 +33,40 @@ class Frame:
         self.opcode = 0
         self.payload_length = 0
         self.payload = b''
-        byte_chunks = binary_to_byte_chunks(get_binary(bytes))
-        self.fin_bit = int(byte_chunks[0][0])
-        self.opcode = int(byte_chunks[0][4] + byte_chunks[0][5] + byte_chunks[0][6] + byte_chunks[0][7], 2)
-        print(f"Opcode is {self.opcode}")
-        mask_bit = int(byte_chunks[1][0])
-        temp = ''
-        for x in range(1, 8):
-            temp += byte_chunks[1][x]
-        self.payload_length = int(temp, 2)
-        print(f"payload_length is {self.payload_length}")
+        self.mask_bit = 0
+
+        self.fin_bit = (bytes[0] & 0b10000000) >> 7
+        self.opcode = (bytes[0] & 0b00001111)
+        self.mask_bit = (bytes[1] & 0b10000000) >> 7
+        self.payload_length = (bytes[1] & 0b01111111)
+
         cursor = 2
-        if(self.payload_length == 126):
-            temp_bytes = byte_chunks[2] + byte_chunks[3]
-            temp = ''
-            for x in range(0, 16):
-                temp += temp_bytes[x]
-            # print(temp)
-            self.payload_length = int(temp, 2)
+        temp_bytes = b''
+        if self.payload_length == 126:
+            temp_bytes += bytes[2].to_bytes(1, 'big')
+            temp_bytes += bytes[3].to_bytes(1, 'big')
+            self.payload_length = int.from_bytes(temp_bytes, 'big')
             cursor = 4
-        elif(self.payload_length == 127):
-            temp_bytes = ''
-            for x in range(2, 10):
-                temp_bytes += byte_chunks[x]
-            temp = ''
-            for x in range(0, 64):
-                temp += temp_bytes[x]
-            # print(temp)
-            self.payload_length = int(temp, 2)
+        elif self.payload_length == 127:
+            for i in range(2, 10):
+                temp_bytes += bytes[i].to_bytes(1, 'big')
+            self.payload_length = int.from_bytes(temp_bytes, 'big')
             cursor = 10
-
-        # if(mask_bit == 1):
-        #     full_mask = ''
-        #     full_mask += byte_chunks[cursor]
-        #     cursor += 1
-        #     full_mask += byte_chunks[cursor]
-        #     cursor += 1
-        #     full_mask += byte_chunks[cursor]
-        #     cursor += 1
-        #     full_mask += byte_chunks[cursor]
-        #     cursor += 1
-        #     print(full_mask)
-        # mask_idx = 0
-        # # print(len(byte_chunks))
-        # print(self.payload_length)
-        # for x in range(cursor, len(byte_chunks), 4):
-        #     cur = byte_chunks[x]
-        #     if(x + 1 < len(byte_chunks)):
-        #         cur += byte_chunks[x + 1]
-        #     if(x + 2 < len(byte_chunks)):
-        #         cur += byte_chunks[x + 2]
-        #     if(x + 3 < len(byte_chunks)):
-        #         cur += byte_chunks[x + 3]
-        #     if(mask_bit == 1):
-        #         print(cur)
-        #         # print(bin(masking_keys[mask_idx % 4]).replace("0b", ""))
-        #         cur = int(cur)
-        #         cur = str(bin(cur ^ int(full_mask)).replace("0b", ""))
-        #         print(cur)
-        #         print('===')
-        #         mask_idx + 1
-        #     self.payload += cur.encode()
-
-
-        if(mask_bit == 1):
-            masking_keys = []
-            masking_keys.append(int(byte_chunks[cursor], 2))
-            cursor += 1
-            masking_keys.append(int(byte_chunks[cursor], 2))
-            cursor += 1
-            masking_keys.append(int(byte_chunks[cursor], 2))
-            cursor += 1
-            masking_keys.append(int(byte_chunks[cursor], 2))
-            cursor += 1
-            # print(masking_keys)
-        mask_idx = 0
-        # print(len(byte_chunks))
-        # print(self.payload_length)
-        for x in range(cursor, len(byte_chunks)):
-            cur = byte_chunks[x]
-            if(mask_bit == 1):
-                # print('cur')
-                # print(cur)
-                # print(bin(masking_keys[mask_idx % 4]).replace("0b", ""))
-                
-                # print('cur, 2')
-                cur = int(cur, 2)
-                # print(cur)
-                # print('masking key')
-                # print(masking_keys[mask_idx % 4])
-                cur = str(bin(cur ^ masking_keys[mask_idx % 4]).replace("0b", ""))
-                
-                # print('cur after')
-                # print(cur)
-                # print('===')
-                mask_idx += 1
-            self.payload += cur.encode()
-
+        if self.mask_bit == 1:
+            masks = []
+            for i in range(4):
+                masks.append(bytes[cursor])
+                cursor += 1
+            print(masks)
         
-
-
+        mask_idx = 0
+        for i in range(cursor, len(bytes)):
+            cur = bytes[i]
+            if self.mask_bit == 1:
+                cur = (cur ^ masks[mask_idx % 4])
+                mask_idx += 1
+            self.payload += cur.to_bytes(1, 'big')
+      
 
 
 def test1():
@@ -205,8 +105,12 @@ def test2():
     print(len(frame.payload))
     print('----- FRAME.PAYLOAD -----')
     print(frame.payload)
-    print('----- FRAME.PAYLOAD UNMASKED BYTES -----')
-    print(byte_chunk_print(binary_to_byte_chunks(str(frame.payload))))
+    print(frame.payload.decode())
+    # print(byte_to_binary_string(int.from_bytes(frame.payload, 'big')))
+    # print(expected_message.encode())
+    # print('----- FRAME.PAYLOAD UNMASKED BYTES -----')
+    # print(byte_chunk_print(binary_to_byte_chunks(str(frame.payload))))
+    # print(byte_chunk_print(binary_to_byte_chunks(byte_to_binary_string(int.from_bytes(frame.payload, 'big')))))
     print("===== TEST2 PASSED =====")
 
 def test_len_126():
@@ -216,6 +120,7 @@ def test_len_126():
     assert frame.fin_bit == 1
     assert frame.opcode == 8
     assert frame.payload_length == 26485
+    print(frame.payload_length)
     print("===== test_len_126 PASSED =====")
 
 def test_len_127():
@@ -225,6 +130,7 @@ def test_len_127():
     assert frame.fin_bit == 1
     assert frame.opcode == 1
     assert frame.payload_length == 7455022031769697139
+    print(frame.payload_length)
     print("===== test_len_127 PASSED =====")
 
 def test_convert():
@@ -282,9 +188,9 @@ def test_no_mask():
     print("===== test_no_mask PASSED =====")
 
 if __name__ == '__main__':
-    test1()
+    # test1()
     test2()
-    test_len_126()
-    test_len_127()
+    # test_len_126()
+    # test_len_127()
     # test_convert()
     # test_no_mask()
