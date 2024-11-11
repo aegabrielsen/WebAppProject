@@ -23,9 +23,34 @@ def websocket_path(request, handler):
     # process frame ( so like have a chat function that reads the packet and then like puts the message in the database)
     # respond with frame (so create the frame with the lo1 function and then handler.request.sendall(frame)
     
+def generate_ws_frame(bytes: bytes):
+    ws_frame = b''
+    # Write a function named generate_ws_frame that takes bytes as a parameter and returns a properly formatted WebSocket frame 
+    # (As bytes) with the input bytes as its payload. Use a fin bit of 1, an op code of bx0001 for text, and no mask. You need to 
+    # handle all 3 payload length modes.
+    byte_1 = 0b10000001 # fin bit of 1 and op code of 1
+    ws_frame += byte_1.to_bytes(1, 'big')
+    length = len(bytes)
+    if length < 126:
+        byte_2 = length
+        ws_frame += byte_2.to_bytes(1, 'big')
+    elif length >= 126 and length < 65536:
+        byte_2 = 126
+        ws_frame += byte_2.to_bytes(1, 'big')
+        ws_frame += (length.to_bytes(2, byteorder = 'big'))
+    elif length >= 65536:
+        byte_2 = 127
+        ws_frame += byte_2.to_bytes(1, 'big')
+        ws_frame += (length.to_bytes(8, byteorder = 'big'))
+    # for b in bytes:
+        # ws_frame += b.to_bytes(1, 'big')
+    ws_frame += (bytes)
+    return ws_frame
 
-def parse_ws_frame(bstr: bytes):
-    return Frame(bstr)
+
+
+def parse_ws_frame(bytes: bytes):
+    return Frame(bytes)
 
 class Frame:
     def __init__(self, bytes: bytes):
@@ -187,6 +212,16 @@ def test_no_mask():
     print(byte_chunk_print(binary_to_byte_chunks(str(frame.payload))))
     print("===== test_no_mask PASSED =====")
 
+def test_create():
+    gen = generate_ws_frame(b'\x04U\x8b\x02\x07\x10\x8d\x00E\x11\x80\x08\x06\x11\x8d\x02E\x11\x8e\x02\x02U\x85\x08%\x10\x8c\x08\x02U\x82')
+    frame = parse_ws_frame(gen)
+    assert frame.fin_bit == 1
+    assert frame.opcode == 1
+    assert frame.mask_bit == 0
+    print(frame.payload_length)
+    print('----- FRAME.PAYLOAD -----')
+    print(frame.payload)
+
 if __name__ == '__main__':
     # test1()
     test2()
@@ -194,3 +229,4 @@ if __name__ == '__main__':
     # test_len_127()
     # test_convert()
     # test_no_mask()
+    # test_create()
