@@ -15,13 +15,28 @@ class Two_Bytes:
         self.opcode = 0
         self.payload_length = 0
         self.mask_bit = 0
-        byte_chunks = binary_to_byte_chunks(get_binary(bytes))
+        binary = get_binary(bytes)
+        print(binary)
+        length_zeroes = 16 - len(binary)
+        leading_zeroes = ''
+        for i in range(length_zeroes):
+            leading_zeroes += '0'
+        binary = leading_zeroes + binary
+        print(f'binary after leading zeroes {binary}')
+        byte_chunks = binary_to_byte_chunks(binary)
         self.fin_bit = int(byte_chunks[0][0])
         self.opcode = int(byte_chunks[0][4] + byte_chunks[0][5] + byte_chunks[0][6] + byte_chunks[0][7], 2)
 
         self.mask_bit = int(byte_chunks[1][0])
+        print(byte_chunks[0])
+        print(f"Opcode is {self.opcode}")
+        print(f"Fin bit is {self.fin_bit}")
+        print(f"Mask bit is {self.mask_bit}")
+        print(f"Payload length is {self.payload_length}")
+
         temp = ''
         for x in range(1, 8):
+            print(byte_chunks[1])
             temp += byte_chunks[1][x]
         self.payload_length = int(temp, 2)
         print(f"Opcode is {self.opcode}")
@@ -62,7 +77,7 @@ def while_reading_frames(request, handler):
         bytes_to_read += payload_length
         received_data += handler.request.recv(bytes_to_read)
 
-        print(received_data)
+        # print(received_data)
         print('--- Frame ---')
         frame = Frame(received_data)
 
@@ -73,9 +88,13 @@ def while_reading_frames(request, handler):
             print(frame.mask_bit)
             print(frame.opcode)
             print(frame.payload_length)
-            print(frame.payload)
-            full_payload = frame.payload
-            full_payload += payload_buffer
+            # print(frame.payload)
+            full_payload = payload_buffer
+            full_payload += frame.payload
+            # full_payload = frame.payload
+            # full_payload += payload_buffer
+            print(f'payload_buffer: {len(payload_buffer)}, frame.payload: {len(frame.payload)}')
+            payload_buffer = b''
             json_data = json.loads(full_payload.decode())
             if 'messageType' in json_data:
                 if json_data["messageType"] == "chatMessage":
@@ -88,7 +107,7 @@ def while_reading_frames(request, handler):
                         new_message = { 'messageType': 'chatMessage', 'username': chat['username'], 'message': chat['message'], 'id': chat['_id']}
                         # new_message = json.dumps(new_message).encode()
                         new_message = json_util.dumps(new_message).encode()
-                        print(new_message)
+                        # print(new_message)
                         
                         for i in handler_set:
                             # print(i)
