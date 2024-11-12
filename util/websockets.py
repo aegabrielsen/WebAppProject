@@ -1,6 +1,5 @@
 import hashlib
 from base64 import b64encode
-from util.read_frames import while_reading_frames
 from util.byte_formating import *
 # from server import MyTCPHandler
 
@@ -9,25 +8,9 @@ def compute_accept(str):
     str = hashlib.sha1(str.encode()).hexdigest()
     str = b64encode(bytes.fromhex(str)).decode()
     return str
-
-def websocket_path(request, handler):
-    print(request.headers)
-    print(request.body)
-    accept = compute_accept(request.headers.get('Sec-WebSocket-Key', 0))
-    response = f"HTTP/1.1 101 Switching Protocols\r\nContent-Length: 0\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Accept: {accept}\r\nX-Content-Type-Options: nosniff\r\n\r\n"
-    handler.request.sendall(response.encode())
-    while_reading_frames(handler)
-    # while true (terminate yourself if there is an opcode 8)
-    # recieve frame (The TA said that he had a full file with functions with recv called like 5~ times. get the first bytes and decide how much more to read)
-    # read frame(he did these two in a full file)
-    # process frame ( so like have a chat function that reads the packet and then like puts the message in the database)
-    # respond with frame (so create the frame with the lo1 function and then handler.request.sendall(frame)
     
 def generate_ws_frame(bytes: bytes):
     ws_frame = b''
-    # Write a function named generate_ws_frame that takes bytes as a parameter and returns a properly formatted WebSocket frame 
-    # (As bytes) with the input bytes as its payload. Use a fin bit of 1, an op code of bx0001 for text, and no mask. You need to 
-    # handle all 3 payload length modes.
     byte_1 = 0b10000001 # fin bit of 1 and op code of 1
     ws_frame += byte_1.to_bytes(1, 'big')
     length = len(bytes)
@@ -42,8 +25,6 @@ def generate_ws_frame(bytes: bytes):
         byte_2 = 127
         ws_frame += byte_2.to_bytes(1, 'big')
         ws_frame += (length.to_bytes(8, byteorder = 'big'))
-    # for b in bytes:
-        # ws_frame += b.to_bytes(1, 'big')
     ws_frame += (bytes)
     return ws_frame
 
@@ -82,7 +63,7 @@ class Frame:
             for i in range(4):
                 masks.append(bytes[cursor])
                 cursor += 1
-            print(masks)
+            # print(masks)
         
         mask_idx = 0
         for i in range(cursor, len(bytes)):
