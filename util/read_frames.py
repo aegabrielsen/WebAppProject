@@ -28,15 +28,15 @@ class Two_Bytes:
         self.opcode = int(byte_chunks[0][4] + byte_chunks[0][5] + byte_chunks[0][6] + byte_chunks[0][7], 2)
 
         self.mask_bit = int(byte_chunks[1][0])
-        print(byte_chunks[0])
+        # print(byte_chunks[0])
         print(f"Opcode is {self.opcode}")
         print(f"Fin bit is {self.fin_bit}")
         print(f"Mask bit is {self.mask_bit}")
-        print(f"Payload length is {self.payload_length}")
+        # print(f"Payload length is {self.payload_length}")
 
         temp = ''
         for x in range(1, 8):
-            print(byte_chunks[1])
+            # print(byte_chunks[1])
             temp += byte_chunks[1][x]
         self.payload_length = int(temp, 2)
         print(f"Opcode is {self.opcode}")
@@ -75,7 +75,17 @@ def while_reading_frames(request, handler):
             received_data += temp # Add the two extra bytes to received_data
             payload_length = int(get_binary(temp), 2)
         bytes_to_read += payload_length
-        received_data += handler.request.recv(bytes_to_read)
+        # length_received = 0
+        while bytes_to_read > 0:
+        # received_temp = handler.request.recv(bytes_to_read)
+            if bytes_to_read > 2048:
+                received_temp = handler.request.recv(2048)
+            else:
+                received_temp = handler.request.recv(bytes_to_read)
+            received_data += received_temp
+            bytes_to_read -= len(received_temp)
+        # length_received += len(received_temp)
+
 
         # print(received_data)
         print('--- Frame ---')
@@ -88,13 +98,19 @@ def while_reading_frames(request, handler):
             print(frame.mask_bit)
             print(frame.opcode)
             print(frame.payload_length)
+            print(f'the len(frame.payload) is {len(frame.payload)}')
+            print(f'the frame.payload is {frame.payload}')
             # print(frame.payload)
-            full_payload = payload_buffer
-            full_payload += frame.payload
+            if len(payload_buffer) > 0:
+                full_payload = payload_buffer
+                full_payload += frame.payload
+                print(f'payload_buffer: {len(payload_buffer)}, frame.payload: {len(frame.payload)}')
+                payload_buffer = b''
+            else:
+                full_payload = frame.payload
             # full_payload = frame.payload
             # full_payload += payload_buffer
-            print(f'payload_buffer: {len(payload_buffer)}, frame.payload: {len(frame.payload)}')
-            payload_buffer = b''
+            print(f'the full payload is: {full_payload}')
             json_data = json.loads(full_payload.decode())
             if 'messageType' in json_data:
                 if json_data["messageType"] == "chatMessage":
