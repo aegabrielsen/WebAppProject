@@ -30,7 +30,7 @@ def login(request, handler):
             user_collection.update_one({"username" : username}, {"$set" : {"auth_token" : hashed_auth_token}})
 
     if auth_token:
-        response = f"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nContent-Type: text/html; charset=utf-8\r\nLocation: /\r\nSet-Cookie: auth_token={auth_token}; Max-Age=360000; HttpOnly\r\nX-Content-Type-Options: nosniff\r\n\r\n"
+        response = f"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nContent-Type: text/html; charset=utf-8\r\nLocation: /\r\nSet-Cookie: auth_token={auth_token}; Max-Age=360000; Secure; HttpOnly\r\nX-Content-Type-Options: nosniff\r\n\r\n"
     else:
         response = f"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nContent-Type: text/html; charset=utf-8\r\nLocation: /\r\nX-Content-Type-Options: nosniff\r\n\r\n"
     handler.request.sendall(response.encode())
